@@ -59,7 +59,6 @@ let assessQuestionResult = (chosenAnswer) => {
 }
 
 let storeQuizResult = () => {
-  questionViewWrap.style.top = '-100vh'
   serverRequest('POST', '/storeuser', '', (xmlhttp) => {
     if (xmlhttp.readyState === 4 && xmlhttp.status === 201) {
       swal('Success', 'Your score has been saved!', 'success')
@@ -67,15 +66,7 @@ let storeQuizResult = () => {
       swal('Error', 'Unknown error!', 'error')
     }
   })
-  notifyWrap.style.display = 'block'
-  notification.style.right = '0'
-  setTimeout(() => {
-    notification.style.right = '-100%'
-    popupWrap.style.top = '50vh'
-    setTimeout(() => {
-      notifyWrap.style.display = 'none'
-    }, 300)
-  }, 1200)
+  
 }
 
 let play = () => {
@@ -141,17 +132,63 @@ let populatePopupResult = () => {
  * @desc function displays the next question or the result when the game is over
  */
 let getNextQuestion = () => {
+  questionViewWrap.style.backgroundColor = 'rgba(38, 50, 56, 1)'
   serverRequest('POST', '/getnextquestion', '', (xmlhttp) => {
     if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
       currentQuestion = JSON.parse(xmlhttp.responseText)
       displayQuestion()
-      startMyTimer()
       greetBox.style.opacity = '0'
       setTimeout(() => {
         greetBox.style.display = 'none'
       }, 300)
     } else if (xmlhttp.readyState === 4 && xmlhttp.status === 204) {
+      questionViewWrap.style.top = '-100vh'
+      notifyWrap.style.display = 'block'
+      notification.style.right = '0'
+      setTimeout(() => {
+        notification.style.right = '-100%'
+        setTimeout(() => {
+          notifyWrap.style.display = 'none'
+        }, 300)
+      }, 1200)
+      swal({
+        title: "Bonus Question!!",
+        text: "Do you want to answer a user-created bonus question?\nYou can double the score or lose it all!",
+        icon: "warning",
+        dangerMode: true,
+        buttons: ["Oh noez!", "Aww yiss!"],
+      }).then((doBonus) => {
+        if (doBonus) {
+          playBonus()
+        } else {
+          storeQuizResult()
+          popupWrap.style.top = '50vh'
+        }
+      })
+    } else if (xmlhttp.readyState === 4 && xmlhttp.status === 401) {
+      questionViewWrap.style.top = '-100vh'
+      notifyWrap.style.display = 'block'
+      notification.style.right = '0'
+      setTimeout(() => {
+        notification.style.right = '-100%'
+        setTimeout(() => {
+          notifyWrap.style.display = 'none'
+        }, 300)
+      }, 1200)
       storeQuizResult()
+      popupWrap.style.top = '50vh'
+    }
+  })
+}
+
+let playBonus = () => {
+  serverRequest('POST', '/getbonusquestion', '', (xmlhttp) => {
+    if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+      currentQuestion = JSON.parse(xmlhttp.responseText)
+      console.log(currentQuestion)
+      displayNotification('beer')
+      displayQuestion()
+      questionViewWrap.style.backgroundColor = 'rgba(255, 102, 0,1)'
     }
   })
 }
@@ -178,6 +215,8 @@ let startTrivia = () => {
 let displayQuestion = () => {
   notifyWrap.style.display = 'block'
   questionViewWrap.style.top = '-100vh'
+  countDownTimer()
+  moveBar()
   setTimeout(() => {
     notification.style.right = '0'
   }, 1)
@@ -194,8 +233,7 @@ let displayQuestion = () => {
     setTimeout(() => {
       notifyWrap.style.display = 'none'
     }, 300)
-    startMyTimer()
-  }, 1200)
+  }, 1000)
 }
 
 /**
@@ -205,13 +243,16 @@ let displayQuestion = () => {
 let displayNotification = (mode, answer) => {
   let thumbUp = 'url(/assets/images/icons/thumb-up.svg)'
   let thumbDown = 'url(/assets/images/icons/dislike.svg)'
-
+  let beer = 'url(/assets/images/icons/beer.svg)'
   if (mode === 'wrong') {
     notifyTitle.innerHTML = '<div> Wrong! Right Answer Is\n'+answer +'</div>'
     document.getElementById('tooltip').style.backgroundImage = thumbDown
   } else if (mode === 'right') {
     notifyTitle.innerHTML = 'Good Job! :)'
     document.getElementById('tooltip').style.backgroundImage = thumbUp
+  } else if (mode === 'beer') {
+    notifyTitle.innerHTML = 'Good Luck!!!'
+    document.getElementById('tooltip').style.backgroundImage = beer
   }
 }
 

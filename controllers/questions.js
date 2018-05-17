@@ -53,12 +53,15 @@ class Questions {
    */
   assessQuestionResult (userObject, questionNumber, chosenAnswer) {
     if (this.questionsList[questionNumber].answers === Number(chosenAnswer)) {
-      userObject.currentScore.userScore += pointPerQuestion + streakBonus * userObject.currentScore.currentStreak
-      userObject.currentScore.currentStreak++
-      if (userObject.currentScore.currentStreak > userObject.currentScore.highestStreak) {
-        userObject.currentScore.highestStreak = userObject.currentScore.currentStreak
+      if (questionNumber >= 10){
+        userObject.currentScore.userScore = userObject.currentScore.userScore*2
+      } else {
+        userObject.currentScore.userScore += pointPerQuestion + streakBonus * userObject.currentScore.currentStreak
+        userObject.currentScore.currentStreak++
+        if (userObject.currentScore.currentStreak > userObject.currentScore.highestStreak) {
+          userObject.currentScore.highestStreak = userObject.currentScore.currentStreak
+        }
       }
-
       return {
         'result': true,
         'currentUser': userObject.toJSON(), 
@@ -66,7 +69,11 @@ class Questions {
         'cquestion': this.questionsList[questionNumber]['question']
       }
     } else {
-      userObject.currentScore.currentStreak = 0
+      if (questionNumber >= 10){
+        userObject.currentScore.userScore = 0
+      } else {
+        userObject.currentScore.currentStreak = 0
+      }
       return {
         'result': false,
         'currentUser': userObject.toJSON(),
