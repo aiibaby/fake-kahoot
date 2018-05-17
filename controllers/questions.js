@@ -61,16 +61,20 @@ class Questions {
 
       return {
         'result': true,
-        'currentUser': userObject.toJSON()
+        'currentUser': userObject.toJSON(), 
+        'answer': this.questionsList[questionNumber][`option${this.questionsList[questionNumber].answers}`],
+        'cquestion': this.questionsList[questionNumber]['question']
       }
     } else {
       userObject.currentScore.currentStreak = 0
       return {
         'result': false,
-        'currentUser': userObject.toJSON()
-      }
+        'currentUser': userObject.toJSON(),
+        'answer': this.questionsList[questionNumber][`option${this.questionsList[questionNumber].answers}`],
+        'cquestion': this.questionsList[questionNumber]['question']
     }
   }
+}
 
   /**
    * @deprecated using a database now

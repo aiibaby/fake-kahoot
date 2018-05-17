@@ -201,8 +201,8 @@ app.post('/starttrivia', (request, response) => {
   let sessionID = request.session.id.toString()
   if (Object.keys(playingUsers).includes(sessionID)) {
     let newQuestions = new questions.Questions()
+    playingUsers[sessionID].currentReview = []
     playingUsers[sessionID].questions = newQuestions
-    console.log(request.body.chosenType, request.body.chosenDiff)
     newQuestions.getQuestions(10, request.body.chosenType, request.body.chosenDiff).then((result) => {
 
       response.send(playingUsers[sessionID].questions.minimalquestionsList[playingUsers[sessionID].questions.currentQuestion])
@@ -228,6 +228,8 @@ app.post('/validateanswer', (request, response) => {
       questionsObject.currentQuestion,
       request.body.chosenAnswer
     )
+    //playingUsers[sessionID].currentReview.push([questionsObject.currentQuestion, questionsObject.questionsList[questionsObject.currentQuestion][`option${this.questionsList[questionsObject.currentQuestion].answers}`]])
+    //console.log(questionsObject.currentQuestion, questionsObject.questionsList[questionsObject.currentQuestion][`option${this.questionsList[questionsObject.currentQuestion].answers}`])
     response.send(result)
   } else {
     response.send(403)
@@ -335,6 +337,10 @@ app.post('/createQuestion', (request, response) => {
       response.sendStatus(406)
     }
   })
+})
+
+app.get('/review', (request, response) => {
+  response.render('review.hbs')
 })
 
 /**
