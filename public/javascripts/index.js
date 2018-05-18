@@ -23,7 +23,6 @@ let questionDiff = document.getElementById('trivia_difficulty')
 
 let currentQuestion = {}
 let userObject = {}
-let questionlist = []
 
 let InitialScript = () => {
   checkLoginStatus((status) => {
@@ -46,8 +45,6 @@ let assessQuestionResult = (chosenAnswer) => {
       userObject = xmlhttpResult.currentUser
       rightanswer = xmlhttpResult.answer
       question = xmlhttpResult.cquestion
-      questionlist.push([rightanswer, question])
-      console.log(questionlist)
       if (xmlhttpResult.result === true) {
         displayNotification('right', rightanswer)
       } else {

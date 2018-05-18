@@ -272,7 +272,6 @@ app.post('/starttrivia', (request, response) => {
     playingUsers[sessionID].currentReview = []
     playingUsers[sessionID].questions = newQuestions
     newQuestions.getQuestions(10, request.body.chosenType, request.body.chosenDiff).then((result) => {
-      console.log(playingUsers[sessionID].questions.minimalquestionsList[playingUsers[sessionID].questions.currentQuestion])
       response.send(playingUsers[sessionID].questions.minimalquestionsList[playingUsers[sessionID].questions.currentQuestion])
     })
   } else {
@@ -296,12 +295,19 @@ app.post('/validateanswer', (request, response) => {
       questionsObject.currentQuestion,
       request.body.chosenAnswer
     )
-    //playingUsers[sessionID].currentReview.push([questionsObject.currentQuestion, questionsObject.questionsList[questionsObject.currentQuestion][`option${this.questionsList[questionsObject.currentQuestion].answers}`]])
-    //console.log(questionsObject.currentQuestion, questionsObject.questionsList[questionsObject.currentQuestion][`option${this.questionsList[questionsObject.currentQuestion].answers}`])
+    
+    playingUsers[sessionID].currentReview.push([
+      questionsObject.questionsList[questionsObject.currentQuestion].question,
+      questionsObject.questionsList[questionsObject.currentQuestion][`option${questionsObject.questionsList[questionsObject.currentQuestion].answers}`],
+    ])
     response.send(result)
   } else {
     response.send(403)
   }
+})
+app.post('/review', (request, response) => {
+  let sessionID = request.session.id.toString()
+  response.send(playingUsers[sessionID].currentReview)
 })
 /**
  * @desc Function sends get request to render about.hbs page, successful responce renders the page
@@ -323,6 +329,10 @@ app.get('/register', (request, response) => {
 
 app.get('/profile', (request, response) => {
   response.render('profile.hbs')
+})
+
+app.get('/review', (request, response) => {
+  response.render('review.hbs')
 })
 
 /**
@@ -405,10 +415,6 @@ app.post('/createQuestion', (request, response) => {
       response.sendStatus(406)
     }
   })
-})
-
-app.get('/review', (request, response) => {
-  response.render('review.hbs')
 })
 
 /**
