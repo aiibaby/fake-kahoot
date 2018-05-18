@@ -65,8 +65,12 @@ class Questions {
       return {
         'result': true,
         'currentUser': userObject.toJSON(), 
+<<<<<<< HEAD
         'answer': this.questionsList[questionNumber][`option${this.questionsList[questionNumber].answers}`],
         'cquestion': this.questionsList[questionNumber]['question']
+=======
+        'answer': this.questionsList[questionNumber][`option${this.questionsList[questionNumber].answers}`]
+>>>>>>> e74e8ef5d33c0ce9158bf894750c61787eae43d8
       }
     } else {
       if (questionNumber >= 10){
@@ -77,8 +81,12 @@ class Questions {
       return {
         'result': false,
         'currentUser': userObject.toJSON(),
+<<<<<<< HEAD
         'answer': this.questionsList[questionNumber][`option${this.questionsList[questionNumber].answers}`],
         'cquestion': this.questionsList[questionNumber]['question']
+=======
+        'answer': this.questionsList[questionNumber][`option${this.questionsList[questionNumber].answers}`]
+>>>>>>> e74e8ef5d33c0ce9158bf894750c61787eae43d8
     }
   }
 }
@@ -91,8 +99,8 @@ class Questions {
   storeQuizResult (userObject) {
     let date = new Date()
     let timeStamp = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
-
-    user.storeUser(userObject.username, userObject.currentScore.userScore, userObject.currentScore.highestStreak, timeStamp)
+    return timeStamp
+    //user.storeUser(userObject.username, userObject.currentScore.userScore, userObject.currentScore.highestStreak, timeStamp)
   }
 }
 
