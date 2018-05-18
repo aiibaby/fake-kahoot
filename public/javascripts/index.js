@@ -44,10 +44,6 @@ let assessQuestionResult = (chosenAnswer) => {
       let xmlhttpResult = JSON.parse(xmlhttp.responseText)
       userObject = xmlhttpResult.currentUser
       rightanswer = xmlhttpResult.answer
-<<<<<<< HEAD
-      question = xmlhttpResult.cquestion
-=======
->>>>>>> e74e8ef5d33c0ce9158bf894750c61787eae43d8
       if (xmlhttpResult.result === true) {
         displayNotification('right', rightanswer)
       } else {
@@ -251,11 +247,7 @@ let displayNotification = (mode, answer) => {
   let thumbDown = 'url(/assets/images/icons/dislike.svg)'
   let beer = 'url(/assets/images/icons/beer.svg)'
   if (mode === 'wrong') {
-<<<<<<< HEAD
-    notifyTitle.innerHTML = '<div> Wrong! Right Answer Is\n'+answer +'</div>'
-=======
     notifyTitle.innerHTML = '<div> Wrong! Right Answer Is\n' + answer + '</div>'
->>>>>>> e74e8ef5d33c0ce9158bf894750c61787eae43d8
     document.getElementById('tooltip').style.backgroundImage = thumbDown
   } else if (mode === 'right') {
     notifyTitle.innerHTML = 'Good Job! :)'

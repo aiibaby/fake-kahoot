@@ -65,12 +65,7 @@ class Questions {
       return {
         'result': true,
         'currentUser': userObject.toJSON(), 
-<<<<<<< HEAD
-        'answer': this.questionsList[questionNumber][`option${this.questionsList[questionNumber].answers}`],
-        'cquestion': this.questionsList[questionNumber]['question']
-=======
         'answer': this.questionsList[questionNumber][`option${this.questionsList[questionNumber].answers}`]
->>>>>>> e74e8ef5d33c0ce9158bf894750c61787eae43d8
       }
     } else {
       if (questionNumber >= 10){
@@ -81,12 +76,7 @@ class Questions {
       return {
         'result': false,
         'currentUser': userObject.toJSON(),
-<<<<<<< HEAD
-        'answer': this.questionsList[questionNumber][`option${this.questionsList[questionNumber].answers}`],
-        'cquestion': this.questionsList[questionNumber]['question']
-=======
         'answer': this.questionsList[questionNumber][`option${this.questionsList[questionNumber].answers}`]
->>>>>>> e74e8ef5d33c0ce9158bf894750c61787eae43d8
     }
   }
 }
