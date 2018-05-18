@@ -44,7 +44,6 @@ let assessQuestionResult = (chosenAnswer) => {
       let xmlhttpResult = JSON.parse(xmlhttp.responseText)
       userObject = xmlhttpResult.currentUser
       rightanswer = xmlhttpResult.answer
-      question = xmlhttpResult.cquestion
       if (xmlhttpResult.result === true) {
         displayNotification('right', rightanswer)
       } else {

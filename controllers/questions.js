@@ -65,8 +65,7 @@ class Questions {
       return {
         'result': true,
         'currentUser': userObject.toJSON(), 
-        'answer': this.questionsList[questionNumber][`option${this.questionsList[questionNumber].answers}`],
-        'cquestion': this.questionsList[questionNumber]['question']
+        'answer': this.questionsList[questionNumber][`option${this.questionsList[questionNumber].answers}`]
       }
     } else {
       if (questionNumber >= 10){
@@ -77,8 +76,7 @@ class Questions {
       return {
         'result': false,
         'currentUser': userObject.toJSON(),
-        'answer': this.questionsList[questionNumber][`option${this.questionsList[questionNumber].answers}`],
-        'cquestion': this.questionsList[questionNumber]['question']
+        'answer': this.questionsList[questionNumber][`option${this.questionsList[questionNumber].answers}`]
     }
   }
 }
