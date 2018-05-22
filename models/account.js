@@ -1,9 +1,21 @@
 const db = require('./database')
 const bcrypt = require('bcrypt')
 const score = require('./score')
-const saltRounds = 10
 
+/**
+ * @class
+ */
 class Account {
+  /**
+   * @summary Holds the methods and attributes for Accounts
+   * @name Account
+   * @class
+   * @public
+   *
+   * @param username - fdsf
+   * @param userID - dasf
+   * @member this.currentScore - Instantiates Score Class
+   */
   constructor (username = undefined, userID = undefined) {
     this.username = username
     this.userID = userID
@@ -11,14 +23,18 @@ class Account {
   }
 
   /**
-   * @desc Provide desc later
+   * @summary Queries database and compares user inputted information to
+   * confirm login
+   * @method
+   * @public
+   *
    * @param username - user's username
    * @param password - user's password
    * @returns {Promise<object>}
    */
   login (username, password) {
     return new Promise((resolve, reject) => {
-      db.executeQuery(`SELECT * FROM public."ACCOUNTS" WHERE "USERNAME" = $1;`, [username]).then((queryResult) => {
+      db.executeQuery(`SELECT * FROM public."ACCOUNTS" WHERE "USERNAME" = '${username}';`).then((queryResult) => {
         let result = JSON.parse(queryResult)
         if (result.length > 0 && bcrypt.compareSync(password, result[0].PASSWORD)) {
           this.username = result[0].USERNAME
@@ -32,7 +48,10 @@ class Account {
   }
 
   /**
-   * @desc Encrypts user's password
+   * @summary Encrypts user's password with bcrypt
+   * @method
+   * @public
+   *
    * @param password - user's password
    * @returns {Promise<object>}
    */
@@ -45,7 +64,10 @@ class Account {
   }
 
   /**
-   * @desc Registration of the user in the database
+   * @summary Registration of the user in the database
+   * @method
+   * @public
+   *
    * @param username - user's username
    * @param password - user's password
    * @returns {Promise<object>}
@@ -53,16 +75,21 @@ class Account {
   register (username, password) {
     return new Promise((resolve, reject) => {
       this.encryptPassword(password).then((result) => {
-        db.executeQuery(`INSERT INTO public."ACCOUNTS"("USERNAME", "PASSWORD")
-         VALUES ($1, $2);`,
-         [username, result])
-        .then((result) => {
-          resolve(result)
-        })
+        db.executeQuery(
+          `INSERT INTO public."ACCOUNTS"("USERNAME", "PASSWORD")` +
+           `VALUES ($1, $2);`,
+          [username, result]).then((result) => { resolve(result) })
       })
     })
   }
 
+  /**
+   * @summary Converts Account class attributes to object
+   * @method
+   * @public
+   *
+   * @return {{username: *, userID: *, currentScore: *}}
+   */
   toJSON () {
     return {
       'username': this.username,
@@ -71,26 +98,40 @@ class Account {
     }
   }
 
-  saveCurrentScore () {
+  /**
+   * @summary Saves user score information to database.
+   * @method
+   * @public
+   *
+   * @return {Promise<any>}
+   */
+  saveCurrentScore (categoryID, difficultyID) {
     return new Promise((resolve, reject) => {
       let date = new Date()
-      let timeStamp = `${date.toLocaleDateString()} ${date.toLocaleTimeString('en-CA')}`
-      //console.log(this)
+      let timeStamp = `${date.toLocaleDateString('en-CA')} 
+      ${date.toLocaleTimeString('en-CA')}`
+
       db.executeQuery(
         `INSERT INTO public."SCORES" (
         "ACCOUNT_ID",
         "SCORE",
         "HIGHEST_STREAK",
-        "DATE"
+        "DATE",
+        "QUIZ_CATEGORY_ID",
+        "DIFFICULTY_ID"
         ) VALUES (
         $1,
         $2,
         $3,
-        $4)`,
+        $4,
+        $5,
+        $6)`,
         [this.userID,
-         this.currentScore.userScore,
-         this.currentScore.highestStreak,
-         timeStamp]
+          this.currentScore.userScore,
+          this.currentScore.highestStreak,
+          timeStamp,
+          categoryID,
+          difficultyID]
       ).then((result) => {
         resolve(result)
       }).catch((error) => {
@@ -100,20 +141,27 @@ class Account {
   }
 
   /**
-   * @desc <provide description>
+   * @summary Compares user inputted username to database username list and
+   * resolves whether the username inputted exists in the database or not.
+   * Also, tests parameter on alphanumeric regular expression otherwise rejects
+   * username.
+   * @method
+   * @public
+   *
    * @param {string} USERNAME - User's username
    * @returns {Promise<object>}
    */
   validateUsername (USERNAME) {
     return new Promise((resolve, reject) => {
       if (this.regexUsername(USERNAME)) {
-        db.executeQuery('SELECT "USERNAME" FROM public."ACCOUNTS";').then((result) => {
-          let userArray = JSON.parse(result)
-          let found = userArray.some(function (el) {
-            return el.USERNAME === USERNAME
+        db.executeQuery('SELECT "USERNAME" FROM public."ACCOUNTS";')
+          .then((result) => {
+            let userArray = JSON.parse(result)
+            let found = userArray.some(function (el) {
+              return el.USERNAME === USERNAME
+            })
+            resolve(!found)
           })
-          resolve(!found)
-        })
       } else {
         reject(new Error('Bad Username'))
       }
@@ -121,7 +169,10 @@ class Account {
   }
 
   /**
-   * tests regex pattern on username string to validate usernames
+   * @summary tests regex pattern on username string to validate username
+   * @method
+   * @public
+   *
    * @param username
    * @returns {boolean}
    */
@@ -130,7 +181,10 @@ class Account {
   }
 
   /**
-   * @desc Validates for a strong password
+   * @summary Validates for a strong password
+   * @method
+   * @public
+   *
    * @param pass - password passed by the user <** correct? **>
    * @returns {boolean} if password is valid returns true, false
    */
@@ -141,14 +195,52 @@ class Account {
     let lengths = pass.length >= 6
     let valid
 
-    if (numbers === null || uppers === null || lowers === null || lengths === false) valid = false
+    if (
+      numbers === null ||
+      uppers === null ||
+      lowers === null ||
+      lengths === false
+    ) valid = false
 
-    if (numbers !== null && uppers !== null && lowers !== null && lengths) valid = true
+    if (
+      numbers !== null &&
+      uppers !== null &&
+      lowers !== null &&
+      lengths
+    ) valid = true
 
     return valid
   }
+
+  userPlayHistory () {
+    return new Promise((resolve, reject) => {
+      if (this.userID !== undefined) {
+        db.executeQuery(`SELECT  S."SCORE", S."HIGHEST_STREAK", S."DATE", QC."CATEGORY_NAME", QD."DIFFICULTY_LEVEL"
+        FROM public."SCORES" S JOIN public."QUIZ_CATEGORY" QC ON QC."QUIZ_CATEGORY_ID" = S."QUIZ_CATEGORY_ID" 
+        JOIN public."QUIZ_DIFFICULTY" QD on QD."DIFFICULTY_ID" = S."DIFFICULTY_ID" 
+        WHERE S."ACCOUNT_ID" = ${this.userID} ORDER BY S."DATE" DESC;`).then((queryResult) => {
+          let userHistory = JSON.parse(queryResult)
+          let displayString = ''
+          // console.log(userHistory)
+          for (let i = 0; i < userHistory.length; i++) {
+            displayString += `<div class="cards scoreHistoryCards">Time: ${userHistory[i].DATE} | Score: ${userHistory[i].SCORE} | Highest Streak: ${userHistory[i].HIGHEST_STREAK} | Category: ${userHistory[i].CATEGORY_NAME} | Difficulty: ${userHistory[i].DIFFICULTY_LEVEL} </div>\n`
+          }
+          // console.log(displayString)
+          resolve(displayString)
+        }).catch((error) => {
+          reject(error)
+        })
+      } else {
+        resolve('Error')
+      }
+    })
+  }
 }
 
+/**
+ * exports Account class
+ * @type {{Account: Account}}
+ */
 module.exports = {
   Account
 }

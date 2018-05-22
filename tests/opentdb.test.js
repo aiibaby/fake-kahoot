@@ -9,21 +9,15 @@ afterAll(() => {
   return undefined
 })
 
-/**
- * If beforeEach is inside a describe block, it runs for each test in the describe block.
- */
 beforeEach(() => {
   return undefined
 })
 
-/**
- * If afterEach is inside a describe block, it runs for each test in the describe block.
- */
 afterEach(() => {
   return undefined
 })
 
-describe('Testing the Open Trivia Database API', () => {
+describe('Data Structure', () => {
   let testStructure = {
     question: expect.anything(),
     option1: expect.anything(),
@@ -34,21 +28,46 @@ describe('Testing the Open Trivia Database API', () => {
   }
 
   test('Check data structure', async () => {
-    await opentdb.getQuestions().then(data => {
-      expect(data[0]).toEqual(testStructure)
-    }).catch(error => {
-      expect(error.message).toBe('Invalid Parameter')
+    await opentdb.retrieveToken().then(async token => {
+      await opentdb.getQuestions(
+        token,
+        10,
+        11,
+        'easy',
+        'multiple'
+      ).then(data => {
+        expect(data[0]).toEqual(testStructure)
+      })
     })
   })
-
+})
+describe('Invalid Parameter', () => {
   test('should catch "Invalid Parameter" error message', async () => {
     await opentdb.getQuestions(
-      numberofQuestions = 1,
+      'asd',
+      numberOfQuestions = 1,
       category = 1,
       difficulty = 1,
       questionType = 2
     ).catch(error => {
       expect(error.message).toBe('Invalid Parameter')
+    })
+  })
+})
+
+describe('Retrieve/Reset Tokens', () => {
+  it('should retrieve token', async () => {
+    await opentdb.retrieveToken().then(token => {
+      expect(token).toBeTruthy()
+    })
+  })
+
+  it('should reset token', async () => {
+    await opentdb.retrieveToken().then(async token => {
+      expect(token).toBeTruthy()
+      await opentdb.resetToken(token).then(resetToken => {
+        expect(resetToken).toBeTruthy()
+      })
     })
   })
 })

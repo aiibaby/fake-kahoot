@@ -1,93 +1,27 @@
 /* eslint-env jest */
 const db = require.requireActual('../models/database')
 const Account = require.requireActual('../models/account')
+let accInst
 
 beforeAll(() => {
-  db.executeQuery(
-    `CREATE TABLE IF NOT EXISTS public."ACCOUNTS"
-  (
-    "ACCOUNT_ID" bigint NOT NULL DEFAULT nextval('"ACCOUNTS_ACCOUNT_ID_seq"'::regclass),
-    "USERNAME" character varying(50) NOT NULL,
-    "PASSWORD" character varying(100) NOT NULL,
-    CONSTRAINT "ACCOUNTS_pkey" PRIMARY KEY ("ACCOUNT_ID")
-  )
-  WITH {
-    OIDS=FALSE
-  );`
-  ).catch(error => {
-    return error
-  })
-
-  db.executeQuery(
-    `CREATE TABLE IF NOT EXISTS public."SCORES"
-  (
-    "SCORE_ID" bigint NOT NULL DEFAULT nextval('"SCORES_SCORE_ID_seq"'::regclass),
-    "ACCOUNT_ID" bigint NOT NULL,
-    "SCORE" double precision NOT NULL,
-    "HIGHEST_STREAK" smallint NOT NULL,
-    "DATE" date NOT NULL,
-    CONSTRAINT "SCORES_pkey" PRIMARY KEY ("SCORE_ID"),
-    CONSTRAINT "SCORE_ACCOUNT" FOREIGN KEY ("ACCOUNT_ID")
-        REFERENCES public."ACCOUNTS" ("ACCOUNT_ID") MATCH SIMPLE
-        ON UPDATE NO ACTION ON DELETE NO ACTION
-  )
-  WITH (
-    OIDS=FALSE
-  );`
-  ).catch(error => {
-    return error
-  })
-
-  db.executeQuery(
-    `CREATE TABLE IF NOT EXISTS public."QUESTIONS"
-  (
-    "QUESTION_ID" bigint NOT NULL DEFAULT nextval('"QUESTIONS_QUESTION_ID_seq"'::regclass),
-    "QUESTION_CONTENT" character varying(1000),
-    "RIGHT_ANSWER" character varying(1000),
-    "WRONG_ANSWER1" character varying(1000),
-    "WRONG_ANSWER2" character varying(1000),
-    "WRONG_ANSWER3" character varying(1000),
-    "ACCOUNT_ID" bigint,
-    CONSTRAINT "QUESTIONS_pkey" PRIMARY KEY ("QUESTION_ID"),
-    CONSTRAINT "FK_ACCOUNT_QUESTION" FOREIGN KEY ("ACCOUNT_ID")
-        REFERENCES public."ACCOUNTS" ("ACCOUNT_ID") MATCH SIMPLE
-        ON UPDATE NO ACTION ON DELETE NO ACTION
-  )
-  WITH (
-    OIDS=FALSE
-  );`
-  ).catch(error => {
-    return error
-  })
   return undefined
 })
 
-afterAll(() => {
-  db.executeQuery(`DELETE FROM public."ACCOUNTS" WHERE "USERNAME" IN (
-  'jestUser1',
-  'tester1',
-  'tester2',
-  'tester3'
-  );`)
-  return undefined
+afterAll(async () => {
+  await db.executeQuery(
+    `DELETE FROM public."ACCOUNTS" WHERE "USERNAME" IN ($1, $2, $3, $4);`,
+    ['jestUser1', 'tester1', 'tester2', 'tester3'])
 })
 
-/**
- * If beforeEach is inside a describe block, it runs for each test in the describe block.
- */
 beforeEach(() => {
-  return undefined
+  accInst = new Account.Account()
 })
 
-/**
- * If afterEach is inside a describe block, it runs for each test in the describe block.
- */
 afterEach(() => {
-  return undefined
+  accInst = undefined
 })
 
 describe('register() tests', () => {
-  let accInst = new Account.Account()
   let usernameGood = [
     'jestUser1',
     'tester1',
@@ -128,50 +62,51 @@ describe('register() tests', () => {
 })
 
 describe('validateUsername() tests', () => {
-  let accInst = new Account.Account()
+  it('should reject and throw error because of bad username inputs',
+    async () => {
+      let badUsername = [
+        '@@@13123asdasdASDADS',
+        '0123456789012345678901234567890123456789',
+        'asd\n123\n',
+        'a'
+      ]
+      for (let i = 0; i < badUsername.length; i++) {
+        await accInst.validateUsername(badUsername[i]).catch(error => {
+          expect(error.message).toBe('Bad Username')
+        })
+      }
+    })
 
-  it('should reject and throw error because of bad username inputs', async () => {
-    let badUsername = [
-      '@@@13123asdasdASDADS',
-      '0123456789012345678901234567890123456789',
-      'asd\n123\n',
-      'a'
-    ]
-    for (let i = 0; i < badUsername.length; i++) {
-      await accInst.validateUsername(badUsername[i]).catch(error => {
-        expect(error.message).toBe('Bad Username')
-      })
-    }
-  })
+  it('should reject and throw error because of bad username inputs',
+    async () => {
+      let badUsername = [
+        '@@@13123asdasdASDADS',
+        '0123456789012345678901234567890123456789',
+        'asd\n123\n',
+        'a'
+      ]
+      for (let i = 0; i < badUsername.length; i++) {
+        await accInst.validateUsername(badUsername[i]).catch(error => {
+          expect(error.message).toBe('Bad Username')
+        })
+      }
+    })
 
-  it('should reject and throw error because of bad username inputs', async () => {
-    let badUsername = [
-      '@@@13123asdasdASDADS',
-      '0123456789012345678901234567890123456789',
-      'asd\n123\n',
-      'a'
-    ]
-    for (let i = 0; i < badUsername.length; i++) {
-      await accInst.validateUsername(badUsername[i]).catch(error => {
-        expect(error.message).toBe('Bad Username')
-      })
-    }
-  })
-
-  it('should resolve True because user names do NOT exist in DB', async () => {
-    let testUsername = [
-      'as54d4535',
-      'DDsad3123',
-      'dsfasdf'
-    ]
-    for (let i = 0; i < testUsername.length; i++) {
-      await accInst.validateUsername(testUsername[i]).then(result => {
-        expect(result).toBeTruthy()
-      }).catch(error => {
-        expect(error.message).toBe('Bad Username')
-      })
-    }
-  })
+  it('should resolve True because user names do NOT exist in DB',
+    async () => {
+      let testUsername = [
+        'as54d4535',
+        'DDsad3123',
+        'dsfasdf'
+      ]
+      for (let i = 0; i < testUsername.length; i++) {
+        await accInst.validateUsername(testUsername[i]).then(result => {
+          expect(result).toBeTruthy()
+        }).catch(error => {
+          expect(error.message).toBe('Bad Username')
+        })
+      }
+    })
 
   it('should resolve False because user names do exist in DB', async () => {
     let testUsername = [
@@ -183,24 +118,12 @@ describe('validateUsername() tests', () => {
     for (let i = 0; i < testUsername.length; i++) {
       await accInst.validateUsername(testUsername[i]).then(result => {
         expect(result).toBeFalsy()
-      }).catch(error => {
-        expect(error.message).toBe('Bad Username')
       })
     }
   })
 })
 
 describe('regexUsername() method tests', () => {
-  let accInst = new Account.Account()
-
-  beforeEach(() => {
-    accInst = new Account.Account()
-  })
-
-  afterEach(function () {
-    accInst = undefined
-  })
-
   test('test regex method for bad usernames', () => {
     let badUsername = [
       '@@@13123asdasdASDADS',
@@ -224,16 +147,6 @@ describe('regexUsername() method tests', () => {
 })
 
 describe('regexPassword() method tests', () => {
-  let accInst = new Account.Account()
-
-  beforeEach(() => {
-    accInst = new Account.Account()
-  })
-
-  afterEach(function () {
-    accInst = undefined
-  })
-
   it('Validating correct passwords', () => {
     let password = [
       'hello1P',
@@ -259,7 +172,6 @@ describe('regexPassword() method tests', () => {
 })
 
 describe('saveCurrentScore()', () => {
-  let accInst = new Account.Account()
   afterEach(() => {
     db.executeQuery(
       `DELETE FROM public."SCORES"
@@ -281,8 +193,6 @@ describe('saveCurrentScore()', () => {
 })
 
 describe('Test encryptPassword()', () => {
-  let accInst = new Account.Account()
-
   test('unencrypted password should not equal encrypted', async () => {
     await accInst.encryptPassword('Hello1').then(result => {
       expect(result).not.toBe('Hello1')
